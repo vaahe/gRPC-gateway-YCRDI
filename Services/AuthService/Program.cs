@@ -1,14 +1,30 @@
+using AuthService;
 using AuthService.Services;
+using Grpc.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5002, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
+
+// Add gRPC services to the container.
 builder.Services.AddGrpc();
 
 var app = builder.Build();
 
+app.MapGrpcService<AuthServiceImpl>();
+
 // Configure the HTTP request pipeline.
-app.MapGrpcService<GreeterService>();
-app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+app.MapGet("/", () => "App is running");
+
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Console.WriteLine("AuthService started successfully on https://localhost:5002");
+});
 
 app.Run();
