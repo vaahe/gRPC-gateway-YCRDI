@@ -1,12 +1,58 @@
-Game Services Backend: API Gateway MicroservicesThis repository contains the backend services for the game, built using ASP.NET Core, gRPC, and the API Gateway pattern.The architecture is designed to provide high-performance internal communication while offering a standard, easily consumable HTTP/REST API for the Unreal Engine (UE) client.🚀 Architecture OverviewThe system is split into two primary layers, connected by the high-speed gRPC protocol. The Gateway acts as a protocol translator and a central security point.Communication FlowThe goal is to shield the external client from internal service complexity:UE Client sends a standard HTTP/S request (e.g., POST /api/auth/signin).The request is received by the API Gateway (ASP.NET Core Web API).The Gateway uses a generated gRPC Client stub to translate the request into a strongly-typed gRPC call.The request is sent internally over HTTP/2 to the Internal Service (e.g., AuthService).The Internal Service executes logic and responds via gRPC.The Gateway converts the gRPC response back to a standard HTTP/JSON response.The final response is sent to the UE Client.Component StructureComponentTechnologyRoleProtocolAPI GatewayASP.NET Core Web APIExternal Entrypoint, Protocol Translation, Security, Routing.HTTP/REST (External) / gRPC Client (Internal)AuthServiceASP.NET Core gRPC ServiceHandles core authentication and user registration logic.gRPC Server (Internal)Other ServicesASP.NET Core gRPC ServiceFuture services (Inventory, Matchmaking, Stats, etc.).gRPC Server (Internal)🛠️ Project Structure and SetupThe solution is organized into separate projects for the Gateway and each internal service.Project FoldersFolderContentNotesGateway/ASP.NET Web API project. Contains controllers and gRPC Client stubs.External InterfaceServices/AuthService/ASP.NET Core gRPC Service project. Contains implementation of the authentication logic.Internal ServiceServices/AuthService/Protos/auth.protoThe canonical contract definition for Auth.Used to generate both Client (Gateway) and Server (AuthService) code.Running the ServicesTo run the full solution locally, you must start both the internal service and the gateway.Start the Internal Service (AuthService):cd Services/AuthService
-dotnet run
-# Runs on https://localhost:5001 (internal gRPC endpoint)
-Start the API Gateway:cd Gateway
-dotnet run
-# Runs on https://localhost:3000 (external HTTP/REST endpoint for UE client)
-(Note: Port numbers may vary based on your local launchSettings.json.)🔑 Authentication Service ImplementationThe AuthService is the foundational service and demonstrates the complete flow.1. Protocol Definition (auth.proto)The contract defines the specific data types and methods for sign-in and sign-up.service AuthService {
-    rpc SignIn (SignInRequest) returns(SignInResponse);
-    rpc SignUp (SignUpRequest) returns(SignUpResponse);
-}
-// ... message definitions ...
-2. Gateway Mapping (AuthController)The Gateway exposes these gRPC methods as standard HTTP endpoints for the UE client:ActionHTTP EndpointInternal ActionBody/ResponseSign InPOST /api/auth/signinCalls _grpcClient.SignInAsync(...)Expects {username, password}Sign UpPOST /api/auth/signupCalls _grpcClient.SignUpAsync(...)Expects {username, password}☁️ Future DevelopmentThis architecture is easily extensible. To add a new service (e.g., InventoryService):Create a new Services/InventoryService project using the gRPC template.Define the contract in Protos/inventory.proto.Add the inventory.proto to the Gateway project with GrpcServices="Client".Add a new InventoryController.cs in the Gateway to expose the public HTTP endpoints.
+# gRPC-gateway-YCRDI
+
+## Overview
+This repository contains the backend services for the game, built using ASP.NET Core, gRPC, and the API Gateway pattern.
+
+## Project Architecture: ApiGateway + Microservices
+This project demonstrates a `microservice architecture` using `.NET 9`, `gRPC`, and a `REST API` gateway. The system consists of:
+
+**1.** ApiGateway \
+**2.** AuthService \
+**3.** UserService \
+**4.** SerialPortService \
+**5.** InternalCommandsService
+
+## Folder Structure
+```
+ProjectRoot/
+├─ Services/
+│  └─ AuthService/
+│     ├─ Protos/auth.proto
+│     ├─ Services/AuthServiceImpl.cs
+│     ├─ Program.cs
+│     └─ AuthService.csproj
+└─ Gateway/
+   └─ ApiGateway/
+      ├─ Controllers/AuthController.cs
+      ├─ Program.cs
+      └─ ApiGateway.csproj
+```
+
+## Communication Flow
+**1.** Client sends REST request to ApiGateway. \
+**2.** ApiGateway maps the REST request to gRPC request. \
+**3.** AuthService processes gRPC request and returns a response. \
+**4.** ApiGateway returns the result to the client as JSON.
+
+```
+POST /api/auth/signin
+Body: { "username": "test", "password": "123" }
+
+ApiGateway -> AuthService.SignInAsync(SignInRequest)
+AuthService -> SignInResponse { userId = "guid" }
+ApiGateway -> Client JSON response
+```
+
+## Key Design Decisions
+| Component       | Choice                             | Reason                                                                   |
+| --------------- | ---------------------------------- | ------------------------------------------------------------------------ |
+| AuthService     | gRPC microservice                  | High performance, strongly-typed, scalable for microservice architecture |
+| ApiGateway      | REST + gRPC client                 | REST-friendly for clients, forwards to gRPC services                     |
+| Proto files     | Protobuf                           | Defines contracts between services, language-agnostic                    |
+| Logging         | Console / ILogger                  | Observability for startup and request handling                           |
+| Ports           | 5001 (Gateway), 5002 (AuthService) | Avoid port conflicts; each service independent                           |
+| Swagger/OpenAPI | ApiGateway                         | Easy testing and documentation for REST endpoints                        |
+
+
+## Feedback
+Feel free to reach me out on [LinkedIn](https://www.linkedin.com/in/vaahe/).
