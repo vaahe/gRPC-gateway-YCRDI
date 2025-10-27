@@ -1,6 +1,4 @@
-using AuthService;
-using AuthService.Services;
-using Grpc.Core;
+using AuthService.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 

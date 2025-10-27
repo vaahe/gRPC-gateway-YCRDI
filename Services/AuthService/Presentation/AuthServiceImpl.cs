@@ -1,6 +1,6 @@
 ﻿using Grpc.Core;
 
-namespace AuthService.Services
+namespace AuthService.Presentation
 {
     public class AuthServiceImpl : AuthService.AuthServiceBase
     {
