@@ -1,3 +1,5 @@
+using Database;
+using Microsoft.EntityFrameworkCore;
 using static AuthService.AuthService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,9 @@ builder.Services.AddGrpcClient<AuthServiceClient>(o =>
 {
     o.Address = new Uri("https://localhost:5002");
 });
+
+builder.Services.AddDbContext<DatabaseContext>(options =>
+    options.UseSqlite("Data Source=app.db"));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

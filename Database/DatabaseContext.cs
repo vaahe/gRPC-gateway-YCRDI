@@ -3,8 +3,10 @@ using Database.Models;
 
 namespace Database
 {
-    public class DatabaseContext(DbContextOptions<DbContext> options) : DbContext(options)
+    public class DatabaseContext : DbContext
     {
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
@@ -24,6 +26,5 @@ namespace Database
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.RoleId);
         }
-
     }
 }
