@@ -1,0 +1,32 @@
+services:
+    authService:
+        build:
+            context: .
+            dockerfile: Services/AuthService/Dockerfile
+        container_name: auth_service
+        image: authservice:latest
+        ports:
+            - "5002:5002"
+        networks:
+            - app_network
+        environment:
+            ASPNETCORE_URLS: "http://+:5002"
+    apiGateway:
+        build:
+            context: .
+            dockerfile: Gateway/ApiGateway/Dockerfile
+        container_name: api_gateway
+        image: apigateway:latest
+        ports:
+            - "5001:5001"
+        networks:
+            - app_network
+        depends_on:
+            - authService
+        environment:
+              ASPNETCORE_URLS: "http://+:5001"
+              GRPC_AUTH_SERVICE_URL: "http://auth_service:5002"
+
+networks:
+    app_network:
+        driver: bridge

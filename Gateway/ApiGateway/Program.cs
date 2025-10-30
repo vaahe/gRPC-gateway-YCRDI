@@ -6,15 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(5001, listenOptions =>
-    {
-        listenOptions.UseHttps();
-    });
+    options.ListenAnyIP(5001);
 });
 
 builder.Services.AddGrpcClient<AuthServiceClient>(o =>
 {
-    o.Address = new Uri("https://localhost:5002");
+    o.Address = new Uri("http://authservice:5002");
 });
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
@@ -29,7 +26,7 @@ app.MapControllers();
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
-    Console.WriteLine("ApiGateway started successfully on https://localhost:5001");
+    Console.WriteLine("ApiGateway started successfully on http://localhost:5001");
 });
 
 app.Run();
