@@ -1,4 +1,9 @@
+using AuthService;
+using AuthService.Interfaces;
 using AuthService.Presentation;
+using AuthService.Services;
+using AuthService.Validators;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +14,13 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Add gRPC services to the container.
 builder.Services.AddGrpc();
+
+// Register business logic services
+builder.Services.AddScoped<IAuthService, AuthServiceLogic>();
+
+// Register validators
+builder.Services.AddScoped<IValidator<SignInRequest>, SignInRequestValidation>();
+builder.Services.AddScoped<IValidator<SignUpRequest>, SignUpRequestValidation>();
 
 var app = builder.Build();
 
