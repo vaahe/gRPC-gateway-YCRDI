@@ -18,9 +18,9 @@
 
   <ItemGroup>
     <Folder Include="Application\" />
-    <Folder Include="Data\" />
-    <Folder Include="Domain\" />
-    <Folder Include="Protos\" />
+    <Folder Include="Domain\Entities\" />
+    <Folder Include="Infrastructure\Repositories\" />
+    <Folder Include="Tests\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,7 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\auth.proto" GrpcServices="Server" />
+    <Protobuf Include="API\Protos\auth.proto">
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
   </ItemGroup>
 
 </Project>

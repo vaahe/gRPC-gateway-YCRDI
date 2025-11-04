@@ -1,7 +1,6 @@
 using AuthService;
-using AuthService.Interfaces;
-using AuthService.Presentation;
-using AuthService.Services;
+using AuthService.Application.Interfaces;
+using AuthService.Application.Services;
 using AuthService.Validators;
 using FluentValidation;
 
@@ -16,7 +15,7 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddGrpc();
 
 // Register business logic services
-builder.Services.AddScoped<IAuthService, AuthServiceLogic>();
+builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
 
 // Register validators
 builder.Services.AddScoped<IValidator<SignInRequest>, SignInRequestValidation>();
@@ -27,11 +26,11 @@ var app = builder.Build();
 app.MapGrpcService<AuthServiceImpl>();
 
 // Configure the HTTP request pipeline.
-app.MapGet("/", () => "App is running");
+app.MapGet("/", () => "AuthService is running...");
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
-    Console.WriteLine("AuthService started successfully on https://localhost:5002");
+    Console.WriteLine("AuthService started successfully on http://localhost:5002");
 });
 
 app.Run();

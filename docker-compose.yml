@@ -2,9 +2,9 @@ services:
     authService:
         build:
             context: .
-            dockerfile: Services/AuthService/Dockerfile
+            dockerfile: Services/AuthService/AuthService.API/Dockerfile
         container_name: auth_service
-        image: authservice:latest
+        image: auth_service:latest
         ports:
             - "5002:5002"
         networks:
@@ -16,7 +16,7 @@ services:
             context: .
             dockerfile: Gateway/ApiGateway/Dockerfile
         container_name: api_gateway
-        image: apigateway:latest
+        image: api_gateway:latest
         ports:
             - "5001:5001"
         networks:
