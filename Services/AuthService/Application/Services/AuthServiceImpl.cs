@@ -10,10 +10,19 @@ using AuthService.Application.Interfaces;
 
 namespace AuthService.Application.Services
 {
-    public class AuthServiceImpl(DatabaseContext context, ILogger logger) : IAuthService
+    public class AuthServiceImpl : IAuthService
     {
+        private readonly DatabaseContext _context;
+        private readonly ILogger<AuthServiceImpl> _logger;
+        
         private readonly SignUpRequestValidation _signUpRequestValidation = new();
         private readonly SignInRequestValidation _signInRequestValidation = new();
+        
+        public AuthServiceImpl(DatabaseContext context, ILogger<AuthServiceImpl> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
 
         public async Task<SignInResponse> SignInAsync(SignInRequest request)
         {
@@ -21,8 +30,8 @@ namespace AuthService.Application.Services
 
             try
             {
-                logger.LogInformation("SignIn attempt for user: {Username}", request.Username);
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+                _logger.LogInformation("SignIn attempt for user: {Username}", request.Username);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
                 if (user == null)
                 {
                     return new SignInResponse { UserId = "0" };
@@ -33,7 +42,7 @@ namespace AuthService.Application.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error while logging in user: {Username}", request.Username);
+                _logger.LogError(ex, "Error while logging in user: {Username}", request.Username);
                 throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
@@ -44,9 +53,9 @@ namespace AuthService.Application.Services
 
             try
             {
-                logger.LogInformation("SignUp attempt for user: {Username}", request.Username);
+                _logger.LogInformation("SignUp attempt for user: {Username}", request.Username);
                 
-                var exists = await context.Users.AnyAsync(u => u.Username == request.Username);
+                var exists = await _context.Users.AnyAsync(u => u.Username == request.Username);
                 if (exists)
                 {
                     return new SignUpResponse { Status = false };
@@ -59,14 +68,14 @@ namespace AuthService.Application.Services
                     PasswordHash = hashedPassword,
                 };
 
-                context.Users.Add(newUser);
-                await context.SaveChangesAsync();
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
 
                 return new SignUpResponse { Status = true };
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error while register");
+                _logger.LogError(ex, "Error while register");
                 throw new RpcException(new Status(StatusCode.Internal, "Internal server error"));
             }
         }
@@ -80,19 +89,16 @@ namespace AuthService.Application.Services
         }
 
         private static bool VerifyPassword(string password, string storedHash)
-        {
-            var hashOfPassword = HashPassword(password);
-            return hashOfPassword == storedHash;
-        }
+            => HashPassword(password) == storedHash;
 
         private static void ValidateRequest<T>(IValidator<T> validator, T request)
-            {
-                var validationResult = validator.Validate(request);
+        {
+            var validationResult = validator.Validate(request);
 
-                if (validationResult.IsValid) return;
-                
-                var message = validationResult.Errors.Select(e => e.ErrorMessage);
-                throw new RpcException(new Status(StatusCode.InvalidArgument, string.Join(", ", message)));
-            }
+            if (validationResult.IsValid) return;
+            
+            var message = validationResult.Errors.Select(e => e.ErrorMessage);
+            throw new RpcException(new Status(StatusCode.InvalidArgument, string.Join(", ", message)));
         }
+    }
 }

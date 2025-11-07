@@ -1,5 +1,3 @@
-using Database;
-using Microsoft.EntityFrameworkCore;
 using static AuthService.AuthService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,11 +9,8 @@ builder.WebHost.ConfigureKestrel(options =>
 
 builder.Services.AddGrpcClient<AuthServiceClient>(o =>
 {
-    o.Address = new Uri("http://authservice:5002");
+    o.Address = new Uri("http://localhost:5002");
 });
-
-builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseSqlite("Data Source=app.db"));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
