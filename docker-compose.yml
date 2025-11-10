@@ -2,7 +2,7 @@ services:
     authService:
         build:
             context: .
-            dockerfile: Services/AuthService/AuthService.API/Dockerfile
+            dockerfile: Services/AuthService/API/Dockerfile
         container_name: auth_service
         image: auth_service:latest
         ports:

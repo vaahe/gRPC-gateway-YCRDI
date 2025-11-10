@@ -35,4 +35,8 @@ app.Lifetime.ApplicationStarted.Register(() =>
     Console.WriteLine("AuthService started successfully on http://localhost:5002");
 });
 
+Console.WriteLine($"[BOOT] ContentRoot = {builder.Environment.ContentRootPath}");
+Console.WriteLine($"[BOOT] BaseDirectory = {AppContext.BaseDirectory}");
+Console.WriteLine($"[BOOT] DefaultConnection = {builder.Configuration.GetConnectionString("DefaultConnection")}");
+
 app.Run();
