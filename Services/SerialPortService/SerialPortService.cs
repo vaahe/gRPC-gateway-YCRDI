@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO.Ports;
-using SerialPortService;
+﻿using System.IO.Ports;
 
 namespace SerialPortService
 {
@@ -20,23 +18,21 @@ namespace SerialPortService
         /// </summary>
         public void Connect()
         {
-            if (!_serialPort.IsOpen)
-            {
-                _serialPort.Open();
-                Console.WriteLine($"Serial port {_serialPort.PortName} connected");
-            }
+            if (_serialPort.IsOpen) return;
+
+            _serialPort.Open();
+            Console.WriteLine($"Serial port {_serialPort.PortName} connected");
         }
 
         /// <summary>
         /// Close the serial port connection
         /// </summary>
-        public void Disconnect()
+        private void Disconnect()
         {
-            if (_serialPort.IsOpen)
-            {
-                _serialPort.Close();
-                Console.WriteLine($"Serial port {_serialPort.PortName} disconnected");
-            }
+            if (!_serialPort.IsOpen) return;
+
+            _serialPort.Close();
+            Console.WriteLine($"Serial port {_serialPort.PortName} disconnected");
         }
 
         private void DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -54,7 +50,7 @@ namespace SerialPortService
         {
             if (_serialPort.IsOpen)
             {
-                _serialPort._WriteLine(data);
+                _serialPort.WriteLine(data);
             }
         }
 
@@ -63,11 +59,10 @@ namespace SerialPortService
         /// </summary>
         public void Receive()
         {
-            if (_serialPort.IsOpen)
-            {
-                var data = _serialPort.ReadExisting();
-                Console.WriteLine($"Buffer: {data}");
-            }
+            if (!_serialPort.IsOpen) return;
+
+            var data = _serialPort.ReadExisting();
+            Console.WriteLine($"Buffer: {data}");
         }
     
         public void Dispose()
