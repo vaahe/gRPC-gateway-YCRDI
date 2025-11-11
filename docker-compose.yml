@@ -11,6 +11,9 @@ services:
             - app_network
         environment:
             ASPNETCORE_URLS: "http://+:5002"
+        volumes:
+          - ./Database/app.db:/app/Database/app.db
+
     apiGateway:
         build:
             context: .
@@ -26,7 +29,21 @@ services:
         environment:
               ASPNETCORE_URLS: "http://+:5001"
               GRPC_AUTH_SERVICE_URL: "http://auth_service:5002"
-
+              
+    serialPortWorker:
+      build:
+        context: .
+        dockerfile: Workers/SerialPortWorker/Dockerfile
+      container_name: serial_port_worker
+      image: serial_port_worker:latest
+      networks:
+        - app_network
+      devices:
+        - "/dev/ttyUSB0:/dev/ttyUSB0"
+      environment:
+        SERIAL_PORT: "dev/ttyUSB0"
+        BAUD_RATE: "57600"
+      
 networks:
     app_network:
         driver: bridge
